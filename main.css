@@ -1,0 +1,162 @@
+body {
+	margin: 0;
+	background-color: #000;
+	color: #fff;
+	font-family: Monospace;
+	font-size: 13px;
+	line-height: 24px;
+	overscroll-behavior: none;
+}
+
+a {
+	color: #ff0;
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+button {
+	cursor: pointer;
+	text-transform: uppercase;
+}
+
+#info {
+	position: absolute;
+	top: 0px;
+	width: 100%;
+	padding: 10px;
+	box-sizing: border-box;
+	text-align: center;
+	-moz-user-select: none;
+	-webkit-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+	pointer-events: none;
+	z-index: 1; 
+}
+
+a, button, input, select {
+	pointer-events: auto;
+}
+
+#help {
+    cursor: pointer;
+    position: absolute;
+    padding: 10px;
+	box-sizing: border-box;
+    text-align: center;
+    margin: auto;
+    font-size: 5vmin;
+    font-weight: 300;
+    
+    transition: font-weight 150ms ease-in-out;
+    z-index: 1; 
+}
+
+#help:hover {
+font-weight: 900;
+}
+
+#leftC {
+    position: absolute;
+	top: 0px;
+	width: 100%;
+	box-sizing: border-box;
+	text-align: left;
+}
+
+.lil-gui {
+	z-index: 2 !important; 
+}
+
+@media all and ( max-width: 640px ) {
+	.lil-gui.root { 
+		right: auto;
+		top: auto;
+		max-height: 50%;
+		max-width: 80%;
+		bottom: 0;
+		left: 0;
+	}
+}
+
+#overlay {
+	position: absolute;
+	font-size: 16px;
+	z-index: 2;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex-direction: column;
+	background: rgba(0,0,0,0.7);
+}
+
+	#overlay button {
+		background: transparent;
+		border: 0;
+		border: 1px solid rgb(255, 255, 255);
+		border-radius: 4px;
+		color: #ffffff;
+		padding: 12px 18px;
+		text-transform: uppercase;
+		cursor: pointer;
+	}
+
+#notSupported {
+	width: 50%;
+	margin: auto;
+	background-color: #f00;
+	margin-top: 20px;
+	padding: 10px;
+}
+
+@import url('https://fonts.googleapis.com/css2?family=Baloo+Chettan+2&family=Calligraffitti&display=swap');
+
+body {
+  background: #6868AC;
+}
+
+#help {
+  font-family: 'Calligraffitti', cursive;
+  margin: auto;
+  font-weight: 700;
+  font-size: 3rem;
+  position: sticky;
+  text-shadow: -10px 5px 20px #ced0d3;
+  letter-spacing: .02em;
+  transform: translate(0%,+80%);
+  text-align: center;
+  color: #fbea9d;
+  text-shadow: 5px 5px 0px #FFB650, 
+    5px 5px 0px #FFD662, 
+    5px 5px 0px  #FF80BF, 
+    5px 5px 0px #EF5097, 
+    10px 10px 0px #02bb43, 
+    5px 5px 0px #90B1E0;
+}
+
+#help2 {
+    font-family: 'Calligraffitti', cursive;
+    margin: auto;
+    font-weight: 700;
+    font-size: 3rem;
+    position: sticky;
+    text-shadow: -15px 5px 20px #ced0d3;
+    letter-spacing: .02em;
+    transform: translate(0%,+240%);
+    text-align: center;
+    color: #fbea9d;
+    text-shadow: 5px 5px 0px #FFB650, 
+        5px 5px 0px #FFD662, 
+        5px 5px 0px  #FF80BF, 
+        5px 5px 0px #EF5097, 
+        10px 10px 0px #02bb43, 
+        5px 5px 0px #90B1E0;
+  }
+
