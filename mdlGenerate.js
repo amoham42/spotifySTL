@@ -66,7 +66,7 @@ function init() {
     
     // SVG FILE
     loader = new SVGLoader();
-    loader.load('files/spot.svg',spot);
+    lnk();
 
     // RENDERER
 
