@@ -6,9 +6,9 @@ import { SVGLoader } from 'three/addons/loaders/SVGLoader.js';
 import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
 import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
 
-let scene, camera, renderer, exporter, code, loader;
+let scene, camera, renderer, code, loader;
 const params = {exportBinary: exportBinary, 'sptLink': '', lnk: lnk, Manual: Manual};
-let address = 'spotify:playlist:37i9dQZF1DXcBWIGoYBM5M';
+let address = 'spotify:track:3ylrCkU7BD4N7SNegCRRXY';
 let update = 24;
 let base;
 init();
@@ -21,7 +21,7 @@ function init() {
 
     scene = new THREE.Scene();
     scene.background = new THREE.Color(0xa0a0a0);
-    exporter = new STLExporter();
+    
 
     // LIGHTS
 
@@ -144,7 +144,7 @@ function spot (data) {
 }
 
 function exportBinary() {
-    
+    var exporter = new STLExporter();
     const result = exporter.parse(code, {binary: true});
     saveArrayBuffer(result, 'keychain.stl');
 
@@ -157,6 +157,7 @@ function lnk() {
   .then(blob => {
     let objectURL = URL.createObjectURL(blob);
     loader = new SVGLoader();
+    scene.remove(code);
     code = new THREE.Group();
     code.add(base);
     loader.load(objectURL, spot);
