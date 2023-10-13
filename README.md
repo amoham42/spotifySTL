@@ -3,6 +3,7 @@ Create a 3D-printable keychain featuring the Spotify code of your favorite song.
 
 Step 1:
 Get the main URL of the song from Spotify, and paste it in the textbox on the top right corner. 
+
 Step 2:
 Export the STL file and import it in any 3D printing software. Make sure to change the filament color after 2mm printed, not before.
 If you do not have a 3D printer or want to send the file to be printed, I recommend https://www.youtube.com/watch?v=1Q7YO5svZtY&pp=ygURc3RhcnQgM2QgcHJpbnRpbmc%3D.
