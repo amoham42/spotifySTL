@@ -1,0 +1,20 @@
+{
+  "name": "spotifystl",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "homepage": "https://amoham42.github.io/spotifySTL/",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "deploy": "gh-pages -d dist"
+  },
+  "devDependencies": {
+    "gh-pages": "^6.3.0",
+    "vite": "^6.0.5"
+  },
+  "dependencies": {
+    "three": "^0.172.0"
+  }
+}
