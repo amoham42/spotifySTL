@@ -1,6 +1,7 @@
 import { defineConfig } from 'vite';
 
 export default defineConfig({
+  base: '/spotifySTL/',
   build: {
     rollupOptions: {
       output: {
