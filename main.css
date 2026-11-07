@@ -1,162 +1,116 @@
-body {
-	margin: 0;
-	background-color: #000;
-	color: #fff;
-	font-family: Monospace;
-	font-size: 13px;
-	line-height: 24px;
-	overscroll-behavior: none;
+:root {
+  --bg: #0f0f14;
+  --panel: rgba(22, 22, 30, 0.86);
+  --line: rgba(255, 255, 255, 0.1);
+  --text: #f2efe9;
+  --muted: #a3a1ab;
+  --green: #1ed760;
+  --error: #ff7a7a;
 }
 
-a {
-	color: #ff0;
-	text-decoration: none;
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  height: 100%;
+  background: radial-gradient(120% 90% at 70% 40%, #262636 0%, var(--bg) 70%);
+  color: var(--text);
+  font: 14px/1.5 Inter, system-ui, sans-serif;
+  overflow: hidden;
 }
 
-a:hover {
-	text-decoration: underline;
+#view {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  touch-action: none;
 }
+
+.panel {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  width: min(360px, calc(100vw - 40px));
+  max-height: calc(100vh - 40px);
+  overflow-y: auto;
+  padding: 22px 22px 16px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+h1 {
+  margin: 0 0 6px;
+  font: 400 2.2rem/1.1 Calligraffitti, cursive;
+  color: #fbea9d;
+  text-shadow: 3px 3px 0 #ef5097, 6px 6px 0 #02bb43;
+}
+h1 span { display: block; }
+
+.lede { margin: 14px 0 18px; color: var(--muted); }
+
+label { display: block; font-weight: 500; margin-bottom: 6px; }
+
+.row { display: flex; gap: 8px; }
+
+input[type="text"] {
+  flex: 1;
+  min-width: 0;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: rgba(0, 0, 0, 0.35);
+  color: var(--text);
+  font: inherit;
+}
+input[type="text"]:focus { outline: 2px solid var(--green); outline-offset: 1px; }
 
 button {
-	cursor: pointer;
-	text-transform: uppercase;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text);
+  font: 600 13px Inter, system-ui, sans-serif;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s;
 }
+button:hover { background: rgba(255, 255, 255, 0.12); }
+button:active { transform: translateY(1px); }
+button:disabled { opacity: 0.45; cursor: progress; }
+button.primary, form button { background: var(--green); color: #07130b; border-color: transparent; }
+button.primary:hover, form button:hover { background: #3be477; }
 
-#info {
-	position: absolute;
-	top: 0px;
-	width: 100%;
-	padding: 10px;
-	box-sizing: border-box;
-	text-align: center;
-	-moz-user-select: none;
-	-webkit-user-select: none;
-	-ms-user-select: none;
-	user-select: none;
-	pointer-events: none;
-	z-index: 1; 
+.message { min-height: 1.5em; margin: 8px 0 4px; font-size: 13px; color: var(--muted); }
+.message.error { color: var(--error); }
+
+details { margin: 6px 0 14px; border-top: 1px solid var(--line); padding-top: 10px; }
+summary { cursor: pointer; font-weight: 600; margin-bottom: 10px; }
+
+.slider { margin: 10px 0; }
+.slider label { display: flex; justify-content: space-between; font-weight: 400; color: var(--muted); }
+.slider output { color: var(--text); font-variant-numeric: tabular-nums; }
+input[type="range"] { width: 100%; accent-color: var(--green); }
+
+.colors { display: flex; gap: 18px; margin-top: 12px; }
+.colors label { display: flex; align-items: center; gap: 8px; font-weight: 400; color: var(--muted); }
+input[type="color"] { width: 34px; height: 26px; padding: 0; border: 1px solid var(--line); border-radius: 6px; background: none; cursor: pointer; }
+
+.exports { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.tip { margin: 12px 0 8px; font-size: 12.5px; color: var(--muted); }
+.tip strong { color: var(--text); font-weight: 600; }
+
+footer { display: flex; gap: 8px; padding-top: 10px; border-top: 1px solid var(--line); font-size: 12.5px; color: var(--muted); }
+footer a { color: var(--muted); text-decoration: none; }
+footer a:hover { color: var(--text); }
+
+@media (max-width: 640px) {
+  .panel { top: auto; bottom: 12px; left: 12px; width: calc(100vw - 24px); max-height: 52vh; padding: 16px; }
+  h1 { font-size: 1.7rem; }
+  h1 span { display: inline; }
+  .lede { display: none; }
 }
-
-a, button, input, select {
-	pointer-events: auto;
-}
-
-#help {
-    cursor: pointer;
-    position: absolute;
-    padding: 10px;
-	box-sizing: border-box;
-    text-align: center;
-    margin: auto;
-    font-size: 5vmin;
-    font-weight: 300;
-    
-    transition: font-weight 150ms ease-in-out;
-    z-index: 1; 
-}
-
-#help:hover {
-font-weight: 900;
-}
-
-#leftC {
-    position: absolute;
-	top: 0px;
-	width: 100%;
-	box-sizing: border-box;
-	text-align: left;
-}
-
-.lil-gui {
-	z-index: 2 !important; 
-}
-
-@media all and ( max-width: 640px ) {
-	.lil-gui.root { 
-		right: auto;
-		top: auto;
-		max-height: 50%;
-		max-width: 80%;
-		bottom: 0;
-		left: 0;
-	}
-}
-
-#overlay {
-	position: absolute;
-	font-size: 16px;
-	z-index: 2;
-	top: 0;
-	left: 0;
-	width: 100%;
-	height: 100%;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	flex-direction: column;
-	background: rgba(0,0,0,0.7);
-}
-
-	#overlay button {
-		background: transparent;
-		border: 0;
-		border: 1px solid rgb(255, 255, 255);
-		border-radius: 4px;
-		color: #ffffff;
-		padding: 12px 18px;
-		text-transform: uppercase;
-		cursor: pointer;
-	}
-
-#notSupported {
-	width: 50%;
-	margin: auto;
-	background-color: #f00;
-	margin-top: 20px;
-	padding: 10px;
-}
-
-@import url('https://fonts.googleapis.com/css2?family=Baloo+Chettan+2&family=Calligraffitti&display=swap');
-
-body {
-  background: #6868AC;
-}
-
-#help {
-  font-family: 'Calligraffitti', cursive;
-  margin: auto;
-  font-weight: 700;
-  font-size: 3rem;
-  position: sticky;
-  text-shadow: -10px 5px 20px #ced0d3;
-  letter-spacing: .02em;
-  transform: translate(0%,+80%);
-  text-align: center;
-  color: #fbea9d;
-  text-shadow: 5px 5px 0px #FFB650, 
-    5px 5px 0px #FFD662, 
-    5px 5px 0px  #FF80BF, 
-    5px 5px 0px #EF5097, 
-    10px 10px 0px #02bb43, 
-    5px 5px 0px #90B1E0;
-}
-
-#help2 {
-    font-family: 'Calligraffitti', cursive;
-    margin: auto;
-    font-weight: 700;
-    font-size: 3rem;
-    position: sticky;
-    text-shadow: -15px 5px 20px #ced0d3;
-    letter-spacing: .02em;
-    transform: translate(0%,+240%);
-    text-align: center;
-    color: #fbea9d;
-    text-shadow: 5px 5px 0px #FFB650, 
-        5px 5px 0px #FFD662, 
-        5px 5px 0px  #FF80BF, 
-        5px 5px 0px #EF5097, 
-        10px 10px 0px #02bb43, 
-        5px 5px 0px #90B1E0;
-  }
-
