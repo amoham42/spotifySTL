@@ -1,0 +1,11 @@
+{
+  "name": "spotify-stl",
+  "private": true,
+  "type": "module",
+  "description": "Turn a Spotify link into a 3D-printable keychain with its Spotify Code.",
+  "scripts": {
+    "start": "npx --yes http-server -c-1 -p 8080 .",
+    "test": "node --test"
+  },
+  "license": "MIT"
+}
