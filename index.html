@@ -1,37 +1,72 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-		<title>Spotify Keychain</title>
-		<meta charset="utf-8">
-		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
-		<link type="text/css" rel="stylesheet" href="main.css">
-	</head>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SpotifySTL: Spotify Code Keychain</title>
+  <meta name="description" content="Turn any Spotify song, album or playlist into a 3D-printable keychain with its scannable Spotify Code.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Calligraffitti&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="main.css">
+</head>
 <body>
-    <div id="info">
-        <a href="https://www.buymeacoffee.com/amoham42" target="_blank" rel="noopener">amoham42</a> Buy me a coffee
-    </div>
-    <div id="leftC">
-      <div id="help">
-        Spotify
-      </div>
-      <div id="help2">
-        Keychain 
-      </div>
-    </div>
-    
-    
-    <script async src="https://unpkg.com/es-module-shims@1.8.0/dist/es-module-shims.js"></script>
-    <script type="importmap">
-      {
-        "imports": {
-          "three": "https://unpkg.com/three@0.156.1/build/three.module.js",
-          "three/addons/": "https://unpkg.com/three@0.156.1/examples/jsm/"
-          
-        }
-      }
-    </script>
-    <!---------------- Main script ----------------->
-    <script type="module" src="mdlGenerate.js"></script>
+  <canvas id="view" aria-label="3D preview of the keychain"></canvas>
 
+  <aside class="panel">
+    <h1>Spotify <span>Keychain</span></h1>
+    <p class="lede">Paste a link to a song, album, playlist, artist or podcast. You get a printable keychain with its scannable Spotify Code.</p>
+
+    <form id="linkForm" autocomplete="off">
+      <label for="link">Spotify link</label>
+      <div class="row">
+        <input id="link" type="text" inputmode="url" placeholder="https://open.spotify.com/track/…" spellcheck="false">
+        <button type="submit">Make</button>
+      </div>
+      <p id="message" class="message" role="status"></p>
+    </form>
+
+    <details open>
+      <summary>Shape</summary>
+      <div class="slider">
+        <label for="length">Length <output id="lengthOut"></output></label>
+        <input id="length" type="range" min="40" max="90" step="1" value="60">
+      </div>
+      <div class="slider">
+        <label for="thickness">Base thickness <output id="thicknessOut"></output></label>
+        <input id="thickness" type="range" min="1.6" max="5" step="0.2" value="3">
+      </div>
+      <div class="slider">
+        <label for="relief">Code height <output id="reliefOut"></output></label>
+        <input id="relief" type="range" min="0.4" max="2" step="0.2" value="1">
+      </div>
+      <div class="colors">
+        <label>Base <input id="baseColor" type="color" value="#f4f1ea"></label>
+        <label>Code <input id="codeColor" type="color" value="#1ed760"></label>
+      </div>
+    </details>
+
+    <div class="exports">
+      <button id="exportAll" class="primary">Download STL</button>
+      <button id="exportParts" title="Base and code as separate files, for multi-material printers">Two-colour files</button>
+    </div>
+    <p class="tip" id="tip"></p>
+
+    <footer>
+      <a href="https://github.com/amoham42/spotifySTL" target="_blank" rel="noopener">GitHub</a>
+      <span>·</span>
+      <a href="https://www.buymeacoffee.com/amoham42" target="_blank" rel="noopener">Buy me a coffee</a>
+    </footer>
+  </aside>
+
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.170.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.170.0/examples/jsm/"
+      }
+    }
+  </script>
+  <script type="module" src="keychain.js"></script>
 </body>
 </html>
