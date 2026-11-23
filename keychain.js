@@ -1,20 +1,25 @@
 // SpotifySTL: builds a 3D-printable keychain carrying a Spotify Code, in the browser.
 //
 // The code itself comes from Spotify's public "scannables" service as an SVG (bars + logo).
-// Its shapes are extruded on top of a rounded base with a key-ring hole; both are generated
-// here in millimetres with Z up, the way slicers expect, and exported as binary STL.
+// Its shapes are extruded inside a rimmed tray with a key-ring hole at one end; both are
+// generated here in millimetres with Z up, the way slicers expect, and exported as binary STL.
 
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { SVGLoader } from 'three/addons/loaders/SVGLoader.js';
 import { STLExporter } from 'three/addons/exporters/STLExporter.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { toSpotifyUri } from './spotify.js';
 
 const DEFAULT_URI = 'spotify:track:3ylrCkU7BD4N7SNegCRRXY';
-const MARGIN = 3;      // mm of base around the code
-const HOLE_D = 4.5;    // key-ring hole diameter, mm
-const OVERLAP = 0.05;  // the code sinks this far into the base so the two bodies fuse cleanly
+// Base proportions, in mm, measured from the original keychain model.
+const RIM = 1;            // width of the raised rim, and of the ring around the hole
+const PAD_X = 2.8;        // tray floor left clear at each end of the code
+const PAD_Y = 2.3;        // tray floor left clear above and below the code
+const HOLE_WALL = 1.5;    // material between the key-ring hole and the long edges
+const HOLE_OFFSET = 0.5;  // the hole sits this far in from the centre of the rounded end
+const OVERLAP = 0.05;     // stacked bodies sink this far into the one below so they fuse cleanly
 
 const $ = (id) => document.getElementById(id);
 const ui = {
@@ -63,42 +68,75 @@ function transformShape(shape, fn) {
   return out;
 }
 
-function roundedRect(w, h, r) {
+/** A slot outline (a rectangle with semicircular ends), centred on the origin. */
+function stadium(length, width) {
+  const r = width / 2, x = length / 2 - r;
   const s = new THREE.Shape();
-  const x = -w / 2, y = -h / 2;
-  s.moveTo(x + r, y);
-  s.lineTo(x + w - r, y);
-  s.absarc(x + w - r, y + r, r, -Math.PI / 2, 0);
-  s.lineTo(x + w, y + h - r);
-  s.absarc(x + w - r, y + h - r, r, 0, Math.PI / 2);
-  s.lineTo(x + r, y + h);
-  s.absarc(x + r, y + h - r, r, Math.PI / 2, Math.PI);
-  s.lineTo(x, y + r);
-  s.absarc(x + r, y + r, r, Math.PI, 1.5 * Math.PI);
+  s.moveTo(-x, -r);
+  s.lineTo(x, -r);
+  s.absarc(x, 0, r, -Math.PI / 2, Math.PI / 2);
+  s.lineTo(-x, r);
+  s.absarc(-x, 0, r, Math.PI / 2, 1.5 * Math.PI);
   return s;
 }
 
-/** Base + code meshes for the given SVG and settings. */
+function circle(cx, r) {
+  const p = new THREE.Path();
+  p.absarc(cx, 0, r, 0, Math.PI * 2, true);
+  return p;
+}
+
+/**
+ * Base + code meshes for the given SVG and settings.
+ *
+ * The base is the original keychain: a tray with a raised rim, a large key-ring hole at one
+ * rounded end with a raised ring around it, and the code standing on the tray floor so that its
+ * top is flush with the rim. At 72 mm it has the original's proportions: 15 mm wide, a 12 mm hole.
+ */
 function buildKeychain(svgText, { length, thickness, relief }, materials) {
   const shapes = codeShapes(svgText);
   const b = boundsOf(shapes);
   const svgW = b.max.x - b.min.x, svgH = b.max.y - b.min.y;
 
-  const holeZone = HOLE_D + 2;  // hole plus a little wall before the code starts
-  const codeW = length - 2 * MARGIN - holeZone;
-  const scale = codeW / svgW;
+  // The width follows the code's height, and the hole end is as long as the keychain is wide,
+  // so the scale has to satisfy: length = width + PAD_X + code + PAD_X + RIM.
+  const scale = (length - 2 * (PAD_Y + RIM) - 2 * PAD_X - RIM) / (svgW + svgH);
   const codeH = svgH * scale;
-  const height = codeH + 2 * MARGIN;
-  const codeLeft = -length / 2 + MARGIN + holeZone;
+  const width = codeH + 2 * (PAD_Y + RIM);
+  const R = width / 2;
+  const left = -length / 2, right = length / 2;
 
-  // base: rounded slab with the key-ring hole
-  const base = roundedRect(length, height, Math.min(height / 2, 5));
-  const hole = new THREE.Path();
-  hole.absarc(-length / 2 + MARGIN + HOLE_D / 2, 0, HOLE_D / 2, 0, Math.PI * 2, true);
-  base.holes.push(hole);
-  const baseGeo = new THREE.ExtrudeGeometry(base, { depth: thickness, bevelEnabled: false, curveSegments: 24 });
+  const holeX = left + R + HOLE_OFFSET;
+  const holeR = R - HOLE_WALL;
+  const ringR = holeR + RIM;   // outer radius of the raised ring around the hole
+  const innerR = R - RIM;      // half-width of the tray
 
-  // code: SVG (y down) -> mm (y up), placed on top of the base
+  // floor: the full outline, from the bed up to the base thickness
+  const floor = stadium(length, width);
+  floor.holes.push(circle(holeX, holeR));
+  const floorGeo = new THREE.ExtrudeGeometry(floor, { depth: thickness, bevelEnabled: false, curveSegments: 32 });
+
+  // rim and ring: the same outline with the tray cut out of it, as tall as the code.
+  // The tray runs from the ring's arc to the inside of the far rounded end.
+  const wall = stadium(length, width);
+  const trayX = holeX + Math.sqrt(ringR * ringR - innerR * innerR);  // where the ring meets the long walls
+  const a = Math.asin(innerR / ringR);
+  const tray = new THREE.Path();
+  tray.moveTo(trayX, -innerR);
+  tray.lineTo(right - R, -innerR);
+  tray.absarc(right - R, 0, innerR, -Math.PI / 2, Math.PI / 2);
+  tray.lineTo(trayX, innerR);
+  tray.absarc(holeX, 0, ringR, a, -a, true);
+  wall.holes.push(circle(holeX, holeR), tray);
+  const wallGeo = new THREE.ExtrudeGeometry(wall, { depth: relief + OVERLAP, bevelEnabled: false, curveSegments: 32 });
+  wallGeo.translate(0, 0, thickness - OVERLAP);
+
+  const baseGeo = mergeGeometries([floorGeo, wallGeo]);
+  floorGeo.dispose();
+  wallGeo.dispose();
+
+  // code: SVG (y down) -> mm (y up), standing on the tray floor
+  const codeLeft = holeX + ringR + PAD_X;
   const toMm = (p) => new THREE.Vector2(codeLeft + (p.x - b.min.x) * scale, codeH / 2 - (p.y - b.min.y) * scale);
   const codeGeos = shapes.map((s) => {
     const g = new THREE.ExtrudeGeometry(transformShape(s, toMm), { depth: relief + OVERLAP, bevelEnabled: false, curveSegments: 12 });
@@ -109,7 +147,7 @@ function buildKeychain(svgText, { length, thickness, relief }, materials) {
   return {
     base: new THREE.Mesh(baseGeo, materials.base),
     code: codeGeos.map((g) => new THREE.Mesh(g, materials.code)),
-    size: { length, height, depth: thickness + relief },
+    size: { length, height: width, depth: thickness + relief },
   };
 }
 
@@ -179,7 +217,8 @@ function rebuild() {
   const { length, height, depth } = current.size;
   ui.tip.innerHTML =
     `${length.toFixed(0)} × ${height.toFixed(1)} × ${depth.toFixed(1)} mm. ` +
-    `For two colours on one nozzle, <strong>change filament at Z = ${s.thickness.toFixed(1)} mm</strong>.`;
+    `For two colours on one nozzle, <strong>change filament at Z = ${s.thickness.toFixed(1)} mm</strong>; ` +
+    `the rim then prints in the code colour too.`;
 }
 
 async function load(uri) {
@@ -257,7 +296,7 @@ ui.codeColor.addEventListener('input', () => materials.code.color.set(ui.codeCol
 // keep the keychain centred in the part of the screen the panel doesn't cover
 // back the camera off until the whole keychain fits the free part of the screen
 function fitCamera() {
-  const length = current ? current.size.length : 60;
+  const length = current ? current.size.length : 72;
   const panel = document.querySelector('.panel').getBoundingClientRect();
   const desktop = window.innerWidth > 640;
   const freeW = desktop ? window.innerWidth - panel.right : window.innerWidth;
