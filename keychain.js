@@ -9,7 +9,6 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { SVGLoader } from 'three/addons/loaders/SVGLoader.js';
 import { STLExporter } from 'three/addons/exporters/STLExporter.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
-import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { toSpotifyUri } from './spotify.js';
 
 const DEFAULT_URI = 'spotify:track:3ylrCkU7BD4N7SNegCRRXY';
@@ -89,9 +88,10 @@ function circle(cx, r) {
 /**
  * Base + code meshes for the given SVG and settings.
  *
- * The base is the original keychain: a tray with a raised rim, a large key-ring hole at one
+ * The shape is the original keychain: a tray with a raised rim, a large key-ring hole at one
  * rounded end with a raised ring around it, and the code standing on the tray floor so that its
  * top is flush with the rim. At 72 mm it has the original's proportions: 15 mm wide, a 12 mm hole.
+ * `base` is the floor; `code` is the layer above it: the rim, the ring and the code's shapes.
  */
 function buildKeychain(svgText, { length, thickness, relief }, materials) {
   const shapes = codeShapes(svgText);
@@ -131,10 +131,6 @@ function buildKeychain(svgText, { length, thickness, relief }, materials) {
   const wallGeo = new THREE.ExtrudeGeometry(wall, { depth: relief + OVERLAP, bevelEnabled: false, curveSegments: 32 });
   wallGeo.translate(0, 0, thickness - OVERLAP);
 
-  const baseGeo = mergeGeometries([floorGeo, wallGeo]);
-  floorGeo.dispose();
-  wallGeo.dispose();
-
   // code: SVG (y down) -> mm (y up), standing on the tray floor
   const codeLeft = holeX + ringR + PAD_X;
   const toMm = (p) => new THREE.Vector2(codeLeft + (p.x - b.min.x) * scale, codeH / 2 - (p.y - b.min.y) * scale);
@@ -144,9 +140,11 @@ function buildKeychain(svgText, { length, thickness, relief }, materials) {
     return g;
   });
 
+  // Everything above the floor (rim, ring and code) is one colour: it is what prints after a
+  // filament change at the floor's height, and what goes in the second file of a two-colour export.
   return {
-    base: new THREE.Mesh(baseGeo, materials.base),
-    code: codeGeos.map((g) => new THREE.Mesh(g, materials.code)),
+    base: new THREE.Mesh(floorGeo, materials.base),
+    code: [wallGeo, ...codeGeos].map((g) => new THREE.Mesh(g, materials.code)),
     size: { length, height: width, depth: thickness + relief },
   };
 }
@@ -217,8 +215,7 @@ function rebuild() {
   const { length, height, depth } = current.size;
   ui.tip.innerHTML =
     `${length.toFixed(0)} × ${height.toFixed(1)} × ${depth.toFixed(1)} mm. ` +
-    `For two colours on one nozzle, <strong>change filament at Z = ${s.thickness.toFixed(1)} mm</strong>; ` +
-    `the rim then prints in the code colour too.`;
+    `For two colours on one nozzle, <strong>change filament at Z = ${s.thickness.toFixed(1)} mm</strong>.`;
 }
 
 async function load(uri) {
